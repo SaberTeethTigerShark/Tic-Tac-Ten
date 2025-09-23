@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tic-Tac-Ten</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js"></script>
+
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            text-decoration: none;
+        }
+
+        body {
+            background-color: #272727;
+            overflow-y: hidden;
+        }
+
+        #playArea {
+            margin: 1vw;
+            width: 98vw;
+            height: 96vh;
+            border: .25vw double white;
+            box-sizing: border-box;
+            background-color: #383838;
+            align-content: center;
+            text-align: center;
+        }
+
+        #start {
+            color: white;
+            background-color: black;
+            border: 3px double white;
+            text-align: center;
+            height: 5vh;
+            padding-left: 1vw;
+            padding-right: 1vw;
+        }
+
+        #start:hover {
+            background-color: #505050;
+        }
+
+        #game {
+            margin-left: 34vw;
+            color: white;
+        }
+
+        .playGrid {
+            border: 1px dashed white;
+            width: 3vw;
+            height: 3vw;
+            display: inline-block;
+            text-align: center;
+            align-content: center;
+        }
+
+        .playGrid:hover {
+            background-color: #505050;
+        }
+
+        .gridRightDouble {
+            border-right: .5vw double white;
+        }
+
+        .gridBottomDouble {
+            border-bottom: .5vw double white;
+        }
+
+        #playerOne {
+            float: left;
+            font-size: 20vw;
+            color: maroon;
+            position: absolute;
+            bottom: 12vw;
+            left: 10vw;
+        }
+
+        #playerTwo {
+            float: right;
+            font-size: 20vw;
+            color: darkblue;
+            position: absolute;
+            bottom: 12vw;
+            right: 10vw;
+        }
+
+        #winMessage {
+            color: white;
+            font-size: 5vw;
+        }
+
+    </style>
+
+    <script>
+
+        /*
+        //  a.  Start
+        //  b.  Detect Click
+        //      Place Current Player Symbol
+        //      Check for win
+        //      If
+        //          A winner is found, declare winner.
+        //      else
+        //          Change to next Player
+        //  c.  Repeat from b
+        //
+        */
+
+        /*  a   123
+        //  b   123
+        //  c   123
+        //
+        //  a1, a2, a3 ; b1, b2, b3 ; c1, c2, c3 ; a1, b1, c1 ; a2, b2, c2 ; a3, b3, c3 ; a1, b2, c3 ; c1, b2, a3
+        //
+         */
+
+        /*  A   123 456 789
+        //  B   123 456 789
+        //  C   123 456 789
+        //
+        //  D   123 456 789
+        //  E   123 456 789
+        //  F   123 456 789
+        //
+        //  G   123 456 789
+        //  H   123 456 789
+        //  I   123 456 789
+        */
+
+        /*  Win Conditions
+        //  A1, A2, A3 ; B1, B2, B3 ; C1, C2, C3 ; A1, B1, C1 ; A2, B2, C2 ; A3, B3, C3 ; A1, B2, C3 ; C1, B2, A3
+        //  A4, A5, A6 ; B4, B5, B6 ; C4, C5, C6 ; A4, B4, C4 ; A5, B5, C5 ; A6, B6, C6 ; A4, B5, C6 ; C4, B5, A6
+        //  A7, A8, A9 ; B7, B8, B9 ; C7, C8, C9 ; A7, B7, C7 ; A8, B8, C8 ; A9, B9, C9 ; A7, B8, C9 ; C7, B8, A9
+        //
+        //  D1, D2, D3 ; E1, E2, E3 ; F1, F2, F3 ; D1, E1, F1 ; D2, E2, F2 ; D3, E3, F3 ; D1, E2, F3 ; F1, E2, D3
+        //  D4, D5, D6 ; E4, E5, E6 ; F4, F5, F6 ; D4, E4, F4 ; D5, E5, F5 ; D6, E6, F6 ; D4, E5, F6 ; F4, E5, D6
+        //  D7, D8, D9 ; E7, E8, E9 ; F7, F8, F9 ; D7, E7, F7 ; D8, E8, F8 ; D9, E9, F9 ; D7, E8, F9 ; F7, E8, D9
+        //
+        //  G1, G2, G3 ; H1, H2, H3 ; I1, I2, I3 ; G1, H1, I1 ; G2, H2, I2 ; G3, H3, I3 ; G1, H2, I3 ; I1, H2, G3
+        //  G4, G5, G6 ; H4, H5, H6 ; I4, I5, I6 ; G4, H4, I4 ; G5, H5, I5 ; G6, H6, I6 ; G4, H5, I6 ; I4, H5, G6
+        //  G7, G8, G9 ; H7, H8, H9 ; I7, I8, I9 ; G7, H7, I7 ; G8, H8, I8 ; G9, H9, I9 ; G7, H8, I9 ; I7, H8, G9
+        */
+
+        let playerSymbols = ['#', 'X', 'O'];
+        let current = playerSymbols[1];
+
+        let a = ['a', ' ', ' ', ' ']
+        let b = ['b', ' ', ' ', ' ']
+        let c = ['c', ' ', ' ', ' ']
+
+        let A = ['A', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let B = ['B', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let C = ['C', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let D = ['D', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let E = ['E', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let F = ['F', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let G = ['G', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let H = ['H', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+        let I = ['I', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ']
+
+        function start() {
+            document.getElementById("game").hidden = false;
+            document.getElementById("start").hidden = true;
+
+            if (current == playerSymbols[1]) {
+                document.getElementById("playerOne").hidden = false;
+                document.getElementById("playerTwo").hidden = true;
+            } else if (current == playerSymbols[2]) {
+                document.getElementById("playerOne").hidden = true;
+                document.getElementById("playerTwo").hidden = false;
+            }
+        }
+
+        function gameLoop(location) {
+            if (current == playerSymbols[1]) {
+                document.getElementById("playerOne").hidden = false;
+                document.getElementById("playerTwo").hidden = true;
+
+                placeSymbol(current, location);
+                checkforWin(current);
+                //document.getElementById("major").innerHTML = A+B+C+D+E+F+G+H+I;
+                //document.getElementById("minor").innerHTML = a+b+c;
+
+            } else if (current == playerSymbols[2]) {
+                document.getElementById("playerOne").hidden = true;
+                document.getElementById("playerTwo").hidden = false;
+
+                placeSymbol(current, location);
+                checkforWin(current);
+                //document.getElementById("major").innerHTML = A+B+C+D+E+F+G+H+I;
+                //document.getElementById("minor").innerHTML = a+b+c;
+            }
+
+            function placeSymbol(player, location) {
+                document.getElementById(location).innerHTML = player;
+
+                if (location == "A1") {
+                    A[1] = player;
+                } else if (location == "A2") {
+                    A[2] = player;
+                } else if (location == "A3") {
+                    A[3] = player;
+                } else if (location == "A4") {
+                    A[4] = player;
+                } else if (location == "A5") {
+                    A[5] = player;
+                } else if (location == "A6") {
+                    A[6] = player;
+                } else if (location == "A7") {
+                    A[7] = player;
+                } else if (location == "A8") {
+                    A[8] = player;
+                } else if (location == "A9") {
+                    A[9] = player;
+                } else if (location == "B1") {
+                    B[1] = player;
+                } else if (location == "B2") {
+                    B[2] = player;
+                } else if (location == "B3") {
+                    B[3] = player;
+                } else if (location == "B4") {
+                    B[4] = player;
+                } else if (location == "B5") {
+                    B[5] = player;
+                } else if (location == "B6") {
+                    B[6] = player;
+                } else if (location == "B7") {
+                    B[7] = player;
+                } else if (location == "B8") {
+                    B[8] = player;
+                } else if (location == "B9") {
+                    B[9] = player;
+                } else if (location == "C1") {
+                    C[1] = player;
+                } else if (location == "C2") {
+                    C[2] = player;
+                } else if (location == "C3") {
+                    C[3] = player;
+                } else if (location == "C4") {
+                    C[4] = player;
+                } else if (location == "C5") {
+                    C[5] = player;
+                } else if (location == "C6") {
+                    C[6] = player;
+                } else if (location == "C7") {
+                    C[7] = player;
+                } else if (location == "C8") {
+                    C[8] = player;
+                } else if (location == "C9") {
+                    C[9] = player;
+                } else if (location == "D1") {
+                    D[1] = player;
+                } else if (location == "D2") {
+                    D[2] = player;
+                } else if (location == "D3") {
+                    D[3] = player;
+                } else if (location == "D4") {
+                    D[4] = player;
+                } else if (location == "D5") {
+                    D[5] = player;
+                } else if (location == "D6") {
+                    D[6] = player;
+                } else if (location == "D7") {
+                    D[7] = player;
+                } else if (location == "D8") {
+                    D[8] = player;
+                } else if (location == "D9") {
+                    D[9] = player;
+                } else if (location == "E1") {
+                    E[1] = player;
+                } else if (location == "E2") {
+                    E[2] = player;
+                } else if (location == "E3") {
+                    E[3] = player;
+                } else if (location == "E4") {
+                    E[4] = player;
+                } else if (location == "E5") {
+                    E[5] = player;
+                } else if (location == "E6") {
+                    E[6] = player;
+                } else if (location == "E7") {
+                    E[7] = player;
+                } else if (location == "E8") {
+                    E[8] = player;
+                } else if (location == "E9") {
+                    E[9] = player;
+                } else if (location == "F1") {
+                    F[1] = player;
+                } else if (location == "F2") {
+                    F[2] = player;
+                } else if (location == "F3") {
+                    F[3] = player;
+                } else if (location == "F4") {
+                    F[4] = player;
+                } else if (location == "F5") {
+                    F[5] = player;
+                } else if (location == "F6") {
+                    F[6] = player;
+                } else if (location == "F7") {
+                    F[7] = player;
+                } else if (location == "F8") {
+                    F[8] = player;
+                } else if (location == "F9") {
+                    F[9] = player;
+                } else if (location == "G1") {
+                    G[1] = player;
+                } else if (location == "G2") {
+                    G[2] = player;
+                } else if (location == "G3") {
+                    G[3] = player;
+                } else if (location == "G4") {
+                    G[4] = player;
+                } else if (location == "G5") {
+                    G[5] = player;
+                } else if (location == "G6") {
+                    G[6] = player;
+                } else if (location == "G7") {
+                    G[7] = player;
+                } else if (location == "G8") {
+                    G[8] = player;
+                } else if (location == "G9") {
+                    G[9] = player;
+                } else if (location == "H1") {
+                    H[1] = player;
+                } else if (location == "H2") {
+                    H[2] = player;
+                } else if (location == "H3") {
+                    H[3] = player;
+                } else if (location == "H4") {
+                    H[4] = player;
+                } else if (location == "H5") {
+                    H[5] = player;
+                } else if (location == "H6") {
+                    H[6] = player;
+                } else if (location == "H7") {
+                    H[7] = player;
+                } else if (location == "H8") {
+                    H[8] = player;
+                } else if (location == "H9") {
+                    H[9] = player;
+                } else if (location == "I1") {
+                    I[1] = player;
+                } else if (location == "I2") {
+                    I[2] = player;
+                } else if (location == "I3") {
+                    I[3] = player;
+                } else if (location == "I4") {
+                    I[4] = player;
+                } else if (location == "I5") {
+                    I[5] = player;
+                } else if (location == "I6") {
+                    I[6] = player;
+                } else if (location == "I7") {
+                    I[7] = player;
+                } else if (location == "I8") {
+                    I[8] = player;
+                } else if (location == "I9") {
+                    I[9] = player;
+                }
+
+                updateMinor(player);
+            }
+
+            function updateMinor(player){
+                // Row a
+                if(
+                    (player === A[1] && player === A[2] && player === A[3]) ||
+                    (player === B[1] && player === B[2] && player === B[3]) ||
+                    (player === C[1] && player === C[2] && player === C[3]) ||
+                    (player === A[1] && player === B[1] && player === C[1]) ||
+                    (player === A[2] && player === B[2] && player === C[2]) ||
+                    (player === A[3] && player === B[3] && player === C[3]) ||
+                    (player === A[1] && player === B[2] && player === C[3]) ||
+                    (player === C[1] && player === B[2] && player === A[3]))
+                {a[1] = player;}
+
+                if(
+                    (player === A[4] && player === A[5] && player === A[6]) ||
+                    (player === B[4] && player === B[5] && player === B[6]) ||
+                    (player === C[4] && player === C[5] && player === C[6]) ||
+                    (player === A[4] && player === B[4] && player === C[4]) ||
+                    (player === A[5] && player === B[5] && player === C[5]) ||
+                    (player === A[6] && player === B[6] && player === C[6]) ||
+                    (player === A[4] && player === B[5] && player === C[6]) ||
+                    (player === C[4] && player === B[5] && player === A[6]))
+                {a[2] = player;}
+
+                if(
+                    (player === A[7] && player === A[8] && player === A[9]) ||
+                    (player === B[7] && player === B[8] && player === B[9]) ||
+                    (player === C[7] && player === C[8] && player === C[9]) ||
+                    (player === A[7] && player === B[7] && player === C[7]) ||
+                    (player === A[8] && player === B[8] && player === C[8]) ||
+                    (player === A[9] && player === B[9] && player === C[9]) ||
+                    (player === A[7] && player === B[8] && player === C[9]) ||
+                    (player === C[7] && player === B[8] && player === A[9]))
+                {a[3] = player;}
+
+                // Row b
+                if(
+                    (player === D[1] && player === D[2] && player === D[3]) ||
+                    (player === E[1] && player === E[2] && player === E[3]) ||
+                    (player === F[1] && player === F[2] && player === F[3]) ||
+                    (player === D[1] && player === E[1] && player === F[1]) ||
+                    (player === D[2] && player === E[2] && player === F[2]) ||
+                    (player === D[3] && player === E[3] && player === F[3]) ||
+                    (player === D[1] && player === E[2] && player === F[3]) ||
+                    (player === F[1] && player === E[2] && player === D[3]))
+                {b[1] = player;}
+
+                if(
+                    (player === D[4] && player === D[5] && player === D[6]) ||
+                    (player === E[4] && player === E[5] && player === E[6]) ||
+                    (player === F[4] && player === F[5] && player === F[6]) ||
+                    (player === D[4] && player === E[4] && player === F[4]) ||
+                    (player === D[5] && player === E[5] && player === F[5]) ||
+                    (player === D[6] && player === E[6] && player === F[6]) ||
+                    (player === D[4] && player === E[5] && player === F[6]) ||
+                    (player === F[4] && player === E[5] && player === D[6]))
+                {b[2] = player;}
+
+                if(
+                    (player === D[7] && player === D[8] && player === D[9]) ||
+                    (player === E[7] && player === E[8] && player === E[9]) ||
+                    (player === F[7] && player === F[8] && player === F[9]) ||
+                    (player === D[7] && player === E[7] && player === F[7]) ||
+                    (player === D[8] && player === E[8] && player === F[8]) ||
+                    (player === D[9] && player === E[9] && player === F[9]) ||
+                    (player === D[7] && player === E[8] && player === F[9]) ||
+                    (player === F[7] && player === E[8] && player === D[9]))
+                {b[3] = player;}
+
+                // Row c
+                if(
+                    (player === G[1] && player === G[2] && player === G[3]) ||
+                    (player === H[1] && player === H[2] && player === H[3]) ||
+                    (player === I[1] && player === I[2] && player === I[3]) ||
+                    (player === G[1] && player === H[1] && player === I[1]) ||
+                    (player === G[2] && player === H[2] && player === I[2]) ||
+                    (player === G[3] && player === H[3] && player === I[3]) ||
+                    (player === G[1] && player === H[2] && player === I[3]) ||
+                    (player === I[1] && player === H[2] && player === G[3]))
+                {c[1] = player;}
+
+                if(
+                    (player === G[4] && player === G[5] && player === G[6]) ||
+                    (player === H[4] && player === H[5] && player === H[6]) ||
+                    (player === I[4] && player === I[5] && player === I[6]) ||
+                    (player === G[4] && player === H[4] && player === I[4]) ||
+                    (player === G[5] && player === H[5] && player === I[5]) ||
+                    (player === G[6] && player === H[6] && player === I[6]) ||
+                    (player === G[4] && player === H[5] && player === I[6]) ||
+                    (player === I[4] && player === H[5] && player === G[6]))
+                {c[2] = player;}
+
+                if(
+                    (player === G[7] && player === G[8] && player === G[9]) ||
+                    (player === H[7] && player === H[8] && player === H[9]) ||
+                    (player === I[7] && player === I[8] && player === I[9]) ||
+                    (player === G[7] && player === H[7] && player === I[7]) ||
+                    (player === G[8] && player === H[8] && player === I[8]) ||
+                    (player === G[9] && player === H[9] && player === I[9]) ||
+                    (player === G[7] && player === H[8] && player === I[9]) ||
+                    (player === I[7] && player === H[8] && player === G[9]))
+                {c[3] = player;}
+            }
+
+            function checkforWin(player){
+
+                /*
+                //  a   123
+                //  b   123
+                //  c   123
+                //
+                //  a1, a2, a3 ; b1, b2, b3 ; c1, c2, c3 ; a1, b1, c1 ; a2, b2, c2 ; a3, b3, c3 ; a1, b2, c3 ; c1, b2, a3
+                //
+                 */
+
+                /*  A   123 456 789
+                //  B   123 456 789
+                //  C   123 456 789
+                //
+                //  D   123 456 789
+                //  E   123 456 789
+                //  F   123 456 789
+                //
+                //  G   123 456 789
+                //  H   123 456 789
+                //  I   123 456 789
+                */
+
+                /*  Win Conditions
+                //  A1, A2, A3 ; B1, B2, B3 ; C1, C2, C3 ; A1, B1, C1 ; A2, B2, C2 ; A3, B3, C3 ; A1, B2, C3 ; C1, B2, A3
+                //  A4, A5, A6 ; B4, B5, B6 ; C4, C5, C6 ; A4, B4, C4 ; A5, B5, C5 ; A6, B6, C6 ; A4, B5, C6 ; C4, B5, A6
+                //  A7, A8, A9 ; B7, B8, B9 ; C7, C8, C9 ; A7, B7, C7 ; A8, B8, C8 ; A9, B9, C9 ; A7, B8, C9 ; C7, B8, A9
+                //
+                //  D1, D2, D3 ; E1, E2, E3 ; F1, F2, F3 ; D1, E1, F1 ; D2, E2, F2 ; D3, E3, F3 ; D1, E2, F3 ; F1, E2, D3
+                //  D4, D5, D6 ; E4, E5, E6 ; F4, F5, F6 ; D4, E4, F4 ; D5, E5, F5 ; D6, E6, F6 ; D4, E5, F6 ; F4, E5, D6
+                //  D7, D8, D9 ; E7, E8, E9 ; F7, F8, F9 ; D7, E7, F7 ; D8, E8, F8 ; D9, E9, F9 ; D7, E8, F9 ; F7, E8, D9
+                //
+                //  G1, G2, G3 ; H1, H2, H3 ; I1, I2, I3 ; G1, H1, I1 ; G2, H2, I2 ; G3, H3, I3 ; G1, H2, I3 ; I1, H2, G3
+                //  G4, G5, G6 ; H4, H5, H6 ; I4, I5, I6 ; G4, H4, I4 ; G5, H5, I5 ; G6, H6, I6 ; G4, H5, I6 ; I4, H5, G6
+                //  G7, G8, G9 ; H7, H8, H9 ; I7, I8, I9 ; G7, H7, I7 ; G8, H8, I8 ; G9, H9, I9 ; G7, H8, I9 ; I7, H8, G9
+                */
+
+                if(
+                    (player === a[1] && player === a[2] && player === a[3]) ||
+                    (player === b[1] && player === b[2] && player === b[3]) ||
+                    (player === c[1] && player === c[2] && player === c[3]) ||
+                    (player === a[1] && player === b[1] && player === c[1]) ||
+                    (player === a[2] && player === b[2] && player === c[2]) ||
+                    (player === a[3] && player === b[3] && player === c[3]) ||
+                    (player === a[1] && player === b[2] && player === c[3]) ||
+                    (player === c[1] && player === b[2] && player === a[3]))
+                {
+                    document.getElementById("playerOne").hidden = true;
+                    document.getElementById("playerTwo").hidden = true;
+                    document.getElementById("winMessage").hidden = false;
+                    document.getElementById("winMessage").innerHTML = `Game Over! ${player} Wins!`;
+                }
+                else {
+                    if(player === playerSymbols[1]){
+                        current = playerSymbols[2];
+                        document.getElementById("playerOne").hidden = true;
+                        document.getElementById("playerTwo").hidden = false;
+                    }
+                    else if (player === playerSymbols[2]){
+                        current = playerSymbols[1];
+                        document.getElementById("playerOne").hidden = false;
+                        document.getElementById("playerTwo").hidden = true;
+                    }
+                }
+            }
+        }
+
+
+    </script>
+</head>
+<body>
+<section id="playArea">
+    <button id="start" onclick="start();">Start</button>
+    <section id="playerOne">X</section>
+    <section id="playerTwo">O</section>
+    <section hidden="true" id="game">
+        <table>
+            <tr>
+                <th class="playGrid" id="A1" onclick="gameLoop('A1');"></th>
+                <th class="playGrid" id="A2" onclick="gameLoop('A2');"></th>
+                <th class="playGrid gridRightDouble" id="A3" onclick="gameLoop('A3');"></th>
+                <th class="playGrid" id="A4" onclick="gameLoop('A4');"></th>
+                <th class="playGrid" id="A5" onclick="gameLoop('A5');"></th>
+                <th class="playGrid gridRightDouble" id="A6" onclick="gameLoop('A6');"></th>
+                <th class="playGrid" id="A7" onclick="gameLoop('A7');"></th>
+                <th class="playGrid" id="A8" onclick="gameLoop('A8');"></th>
+                <th class="playGrid" id="A9" onclick="gameLoop('A9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid" id="B1" onclick="gameLoop('B1');"></th>
+                <th class="playGrid" id="B2" onclick="gameLoop('B2');"></th>
+                <th class="playGrid gridRightDouble" id="B3" onclick="gameLoop('B3');"></th>
+                <th class="playGrid" id="B4" onclick="gameLoop('B4');"></th>
+                <th class="playGrid" id="B5" onclick="gameLoop('B5');"></th>
+                <th class="playGrid gridRightDouble" id="B6" onclick="gameLoop('B6');"></th>
+                <th class="playGrid" id="B7" onclick="gameLoop('B7');"></th>
+                <th class="playGrid" id="B8" onclick="gameLoop('B8');"></th>
+                <th class="playGrid" id="B9" onclick="gameLoop('B9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid gridBottomDouble" id="C1" onclick="gameLoop('C1');"></th>
+                <th class="playGrid gridBottomDouble" id="C2" onclick="gameLoop('C2');"></th>
+                <th class="playGrid gridBottomDouble gridRightDouble" id="C3" onclick="gameLoop('C3');"></th>
+                <th class="playGrid gridBottomDouble" id="C4" onclick="gameLoop('C4');"></th>
+                <th class="playGrid gridBottomDouble" id="C5" onclick="gameLoop('C5');"></th>
+                <th class="playGrid gridBottomDouble gridRightDouble" id="C6" onclick="gameLoop('C6');"></th>
+                <th class="playGrid gridBottomDouble" id="C7" onclick="gameLoop('C7');"></th>
+                <th class="playGrid gridBottomDouble" id="C8" onclick="gameLoop('C8');"></th>
+                <th class="playGrid gridBottomDouble" id="C9" onclick="gameLoop('C9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid" id="D1" onclick="gameLoop('D1');"></th>
+                <th class="playGrid" id="D2" onclick="gameLoop('D2');"></th>
+                <th class="playGrid gridRightDouble" id="D3" onclick="gameLoop('D3');"></th>
+                <th class="playGrid" id="D4" onclick="gameLoop('D4');"></th>
+                <th class="playGrid" id="D5" onclick="gameLoop('D5');"></th>
+                <th class="playGrid gridRightDouble" id="D6" onclick="gameLoop('D6');"></th>
+                <th class="playGrid" id="D7" onclick="gameLoop('D7');"></th>
+                <th class="playGrid" id="D8" onclick="gameLoop('D8');"></th>
+                <th class="playGrid" id="D9" onclick="gameLoop('D9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid" id="E1" onclick="gameLoop('E1');"></th>
+                <th class="playGrid" id="E2" onclick="gameLoop('E2');"></th>
+                <th class="playGrid gridRightDouble" id="E3" onclick="gameLoop('E3');"></th>
+                <th class="playGrid" id="E4" onclick="gameLoop('E4');"></th>
+                <th class="playGrid" id="E5" onclick="gameLoop('E5');"></th>
+                <th class="playGrid gridRightDouble" id="E6" onclick="gameLoop('E6');"></th>
+                <th class="playGrid" id="E7" onclick="gameLoop('E7');"></th>
+                <th class="playGrid" id="E8" onclick="gameLoop('E8');"></th>
+                <th class="playGrid" id="E9" onclick="gameLoop('E9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid gridBottomDouble" id="F1" onclick="gameLoop('F1');"></th>
+                <th class="playGrid gridBottomDouble" id="F2" onclick="gameLoop('F2');"></th>
+                <th class="playGrid gridBottomDouble gridRightDouble" id="F3" onclick="gameLoop('F3');"></th>
+                <th class="playGrid gridBottomDouble" id="F4" onclick="gameLoop('F4');"></th>
+                <th class="playGrid gridBottomDouble" id="F5" onclick="gameLoop('F5');"></th>
+                <th class="playGrid gridBottomDouble gridRightDouble" id="F6" onclick="gameLoop('F6');"></th>
+                <th class="playGrid gridBottomDouble" id="F7" onclick="gameLoop('F7');"></th>
+                <th class="playGrid gridBottomDouble" id="F8" onclick="gameLoop('F8');"></th>
+                <th class="playGrid gridBottomDouble" id="F9" onclick="gameLoop('F9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid" id="G1" onclick="gameLoop('G1');"></th>
+                <th class="playGrid" id="G2" onclick="gameLoop('G2');"></th>
+                <th class="playGrid gridRightDouble" id="G3" onclick="gameLoop('G3');"></th>
+                <th class="playGrid" id="G4" onclick="gameLoop('G4');"></th>
+                <th class="playGrid" id="G5" onclick="gameLoop('G5');"></th>
+                <th class="playGrid gridRightDouble" id="G6" onclick="gameLoop('G6');"></th>
+                <th class="playGrid" id="G7" onclick="gameLoop('G7');"></th>
+                <th class="playGrid" id="G8" onclick="gameLoop('G8');"></th>
+                <th class="playGrid" id="G9" onclick="gameLoop('G9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid" id="H1" onclick="gameLoop('H1');"></th>
+                <th class="playGrid" id="H2" onclick="gameLoop('H2');"></th>
+                <th class="playGrid gridRightDouble" id="H3" onclick="gameLoop('H3');"></th>
+                <th class="playGrid" id="H4" onclick="gameLoop('H4');"></th>
+                <th class="playGrid" id="H5" onclick="gameLoop('H5');"></th>
+                <th class="playGrid gridRightDouble" id="H6" onclick="gameLoop('H6');"></th>
+                <th class="playGrid" id="H7" onclick="gameLoop('H7');"></th>
+                <th class="playGrid" id="H8" onclick="gameLoop('H8');"></th>
+                <th class="playGrid" id="H9" onclick="gameLoop('H9');"></th>
+            </tr>
+            <tr>
+                <th class="playGrid" id="I1" onclick="gameLoop('I1');"></th>
+                <th class="playGrid" id="I2" onclick="gameLoop('I2');"></th>
+                <th class="playGrid gridRightDouble" id="I3" onclick="gameLoop('I3');"></th>
+                <th class="playGrid" id="I4" onclick="gameLoop('I4');"></th>
+                <th class="playGrid" id="I5" onclick="gameLoop('I5');"></th>
+                <th class="playGrid gridRightDouble" id="I6" onclick="gameLoop('I6');"></th>
+                <th class="playGrid" id="I7" onclick="gameLoop('I7');"></th>
+                <th class="playGrid" id="I8" onclick="gameLoop('I8');"></th>
+                <th class="playGrid" id="I9" onclick="gameLoop('I9');"></th>
+            </tr>
+        </table>
+
+
+    </section>
+    <section hidden="true" id="winMessage">Game Over!</section>
+    <!--    <section id="minor"></section>-->
+    <!--    <section id="major"></section>-->
+</section>
+</body>
+</html>
